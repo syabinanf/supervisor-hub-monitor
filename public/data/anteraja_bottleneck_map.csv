@@ -1,0 +1,7 @@
+hub_id,hub_name,latitude,longitude,package_count,avg_dwell_hours,median_dwell_hours
+HUB_MKS,Makassar Hub,-5.1477,119.4327,1666,12.99,12.98
+HUB_MDN,Medan Hub,3.5952,98.6722,1667,10.01,10.02
+HUB_SBY,Surabaya Hub,-7.2575,112.7521,1667,6.98,6.97
+HUB_SMG,Semarang Hub,-6.9667,110.4167,1666,5.0,5.01
+HUB_BDG,Bandung Hub,-6.9175,107.6191,1667,3.99,3.98
+HUB_JKT,Jakarta Hub,-6.2088,106.8456,1667,2.04,2.05

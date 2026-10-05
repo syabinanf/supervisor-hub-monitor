@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<title>Anteraja Hub Dwell Monitor - Simulasi Operasional</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" rel="stylesheet"/>
+<script crossorigin="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f0f3ff; }
+    ::-webkit-scrollbar-thumb { background: #d8e3fb; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #8e6f77; }
+    .custom-anteraja-pin { transition: transform 0.2s ease-in-out; }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "tertiary-fixed": "#cce5ff",
+            "inverse-primary": "#ffb0c9",
+            "on-primary-fixed-variant": "#8e004b",
+            "secondary-fixed-dim": "#ffb693",
+            "inverse-on-surface": "#ecf1ff",
+            "tertiary": "#006397",
+            "surface-bright": "#f9f9ff",
+            "primary-container": "#e6007e",
+            "tertiary-fixed-dim": "#93ccff",
+            "primary": "#b90064",
+            "on-tertiary-fixed-variant": "#004b73",
+            "on-surface": "#111c2d",
+            "surface-variant": "#d8e3fb",
+            "secondary-fixed": "#ffdbcb",
+            "primary-fixed": "#ffd9e2",
+            "surface": "#f9f9ff",
+            "on-tertiary-fixed": "#001d31",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "outline-variant": "#e2bdc7",
+            "on-secondary-fixed-variant": "#7a3000",
+            "on-primary-fixed": "#3e001e",
+            "secondary": "#a04100",
+            "background": "#f9f9ff",
+            "on-error": "#ffffff",
+            "tertiary-container": "#007dbd",
+            "secondary-container": "#fc7728",
+            "error-container": "#ffdad6",
+            "primary-fixed-dim": "#ffb0c9",
+            "outline": "#8e6f77",
+            "error": "#ba1a1a",
+            "on-secondary": "#ffffff",
+            "surface-container-low": "#f0f3ff",
+            "surface-dim": "#cfdaf2",
+            "surface-container": "#e7eeff",
+            "surface-container-high": "#dee8ff",
+            "on-primary-container": "#ffffff",
+            "on-primary": "#ffffff",
+            "on-background": "#111c2d",
+            "on-surface-variant": "#5a3f47",
+            "on-secondary-container": "#5d2300",
+            "surface-container-highest": "#d8e3fb",
+            "on-error-container": "#93000a",
+            "on-secondary-fixed": "#341000",
+            "on-tertiary-container": "#00050d",
+            "surface-tint": "#b90064",
+            "inverse-surface": "#263143"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "space-sm": "0.5rem",
+            "space-xs": "0.25rem",
+            "space-xl": "2.5rem",
+            "margin": "1rem",
+            "space-md": "1rem",
+            "gutter-desktop": "1.5rem",
+            "margin-desktop": "2rem",
+            "space-lg": "1.5rem",
+            "gutter": "1rem"
+          },
+          fontFamily: {
+            "metric-display": ["JetBrains Mono", "monospace"],
+            "label-lg": ["Plus Jakarta Sans", "sans-serif"],
+            "body-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-lg-mobile": ["Plus Jakarta Sans", "sans-serif"],
+            "label-md": ["JetBrains Mono", "monospace"],
+            "body-lg": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-xl": ["Plus Jakarta Sans", "sans-serif"],
+            "body-md": ["Plus Jakarta Sans", "sans-serif"],
+            "label-sm": ["JetBrains Mono", "monospace"],
+            "headline-xl-mobile": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-md": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-lg": ["Plus Jakarta Sans", "sans-serif"]
+          },
+          fontSize: {
+            "metric-display": ["32px", { lineHeight: "40px", fontWeight: "700" }],
+            "label-lg": ["14px", { lineHeight: "20px", fontWeight: "600" }],
+            "body-sm": ["12px", { lineHeight: "18px", fontWeight: "400" }],
+            "headline-lg-mobile": ["22px", { lineHeight: "30px", fontWeight: "700" }],
+            "label-md": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+            "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            "headline-xl": ["36px", { lineHeight: "44px", fontWeight: "800" }],
+            "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            "label-sm": ["11px", { lineHeight: "14px", fontWeight: "500" }],
+            "headline-xl-mobile": ["28px", { lineHeight: "36px", fontWeight: "800" }],
+            "headline-md": ["20px", { lineHeight: "28px", fontWeight: "700" }],
+            "headline-sm": ["16px", { lineHeight: "24px", fontWeight: "600" }],
+            "headline-lg": ["28px", { lineHeight: "36px", fontWeight: "700" }]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased overflow-x-hidden">
+<!-- Mobile Drawer Backdrop Overlay -->
+<div class="fixed inset-0 bg-on-surface/40 z-40 lg:hidden hidden transition-opacity duration-300" id="sidebarBackdrop" onclick="toggleSidebar(false)"></div>
+<!-- Sidebar -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.06)] z-50 flex flex-col justify-between -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out" id="mainSidebar">
+<div class="flex flex-col">
+<!-- Brand Header -->
+<div class="h-16 px-space-lg flex items-center justify-between bg-surface-container-lowest border-b border-surface-container-low lg:border-none">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container shadow-sm flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">local_shipping</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface flex items-center gap-1.5">
+              anteraja<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+</span>
+<span class="font-label-sm text-label-sm text-primary tracking-wide uppercase font-semibold">Hub Dwell Monitor</span>
+</div>
+</div>
+<!-- Close button mobile -->
+<button class="lg:hidden w-10 h-10 rounded-lg flex items-center justify-center text-outline hover:bg-surface-container" onclick="toggleSidebar(false)">
+<span class="material-symbols-outlined text-[22px]">close</span>
+</button>
+</div>
+<!-- Simulation mode sub-banner -->
+<div class="px-space-md py-space-sm">
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0">warning</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-bold text-on-surface">Simulasi Aktif</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Data Latihan Ops</span>
+</div>
+</div>
+</div>
+<!-- Navigation links (All 5 interactive tabs) -->
+<nav class="flex flex-col gap-1 px-space-md mt-space-sm" id="sidebarNav">
+<button class="w-full text-left flex items-center gap-space-sm px-space-md py-2.5 transition-all bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-sm" id="nav-hub-dwell-monitor" onclick="navigateToPage('hub-dwell-monitor')">
+<span class="material-symbols-outlined text-[20px]">radar</span>
+<span class="font-label-lg text-label-lg">Hub Dwell Monitor</span>
+</button>
+<button class="w-full text-left flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" id="nav-antrean-paket" onclick="navigateToPage('antrean-paket')">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="font-label-lg text-label-lg">Antrean Paket</span>
+</button>
+<button class="w-full text-left flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" id="nav-sla-clearance-alerts" onclick="navigateToPage('sla-clearance-alerts')">
+<span class="material-symbols-outlined text-[20px]">notifications_active</span>
+<span class="font-label-lg text-label-lg">SLA Clearance Alerts</span>
+</button>
+<button class="w-full text-left flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" id="nav-peta-distribusi-hub" onclick="navigateToPage('peta-distribusi-hub')">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+<span class="font-label-lg text-label-lg">Peta Distribusi Hub</span>
+</button>
+<button class="w-full text-left flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" id="nav-laporan-analitik" onclick="navigateToPage('laporan-analitik')">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span class="font-label-lg text-label-lg">Laporan Analitik</span>
+</button>
+</nav>
+</div>
+<!-- SLA Health Widget in sidebar footer -->
+<div class="p-space-md bg-surface-container-lowest">
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold text-primary">SLA HEALTH</span>
+<span class="font-label-sm text-label-sm font-bold text-secondary-container font-mono">92.4%</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-primary-container rounded-full w-[92%]"></div>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant text-[11px]">Target hub dwell &lt; 4 Jam</span>
+</div>
+</div>
+</aside>
+<!-- Main Container -->
+<div class="lg:pl-64 flex flex-col min-h-screen w-full max-w-full overflow-x-hidden">
+<!-- Clean Professional Top Header (Redundant breadcrumbs & subnav links removed as requested) -->
+<header class="fixed top-0 left-0 lg:left-64 right-0 h-16 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-30 flex items-center justify-between px-4 sm:px-space-md lg:px-space-margin-desktop">
+<!-- Left side: Hamburger (mobile/tablet) + Logo/Title -->
+<div class="flex items-center gap-3">
+<button aria-label="Buka Menu" class="lg:hidden w-11 h-11 -ml-1 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container active:bg-surface-variant flex-shrink-0" onclick="toggleSidebar(true)">
+<span class="material-symbols-outlined text-[26px]">menu</span>
+</button>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">Anteraja Hub Ops</span>
+<span class="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+<span class="hidden sm:inline-block font-body-sm text-xs text-on-surface-variant">Monitoring Operasional</span>
+</div>
+</div>
+<!-- Right side: Notifications & Profile -->
+<div class="flex items-center gap-3">
+<button class="relative w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" onclick="navigateToPage('sla-clearance-alerts')" title="Notifikasi Alert">
+<span class="material-symbols-outlined text-[22px]">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary-container"></span>
+</button>
+<div class="h-6 w-px bg-surface-container-highest"></div>
+<!-- User profile -->
+<div class="flex items-center gap-space-sm pl-1">
+<div class="flex flex-col text-right hidden sm:flex">
+<span class="font-label-lg text-label-lg text-on-surface leading-tight font-semibold">Budi Santoso</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Supervisor Operasional</span>
+</div>
+<div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center shadow-sm text-on-primary">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Dynamic Content Container -->
+<main class="w-full pt-16 bg-surface min-h-[calc(100vh-4rem)] flex-1 flex flex-col max-w-full overflow-x-hidden">
+<!-- Global Simulation Top Warning Strip -->
+<div class="px-4 sm:px-space-md lg:px-space-margin-desktop py-2 bg-secondary-fixed/50 flex flex-wrap items-center justify-between gap-2 border-b border-secondary-fixed">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px] sm:text-[20px] flex-shrink-0" style="font-variation-settings: 'FILL' 1;">warning</span>
+<p class="font-body-sm text-xs sm:text-body-sm text-on-secondary-fixed font-medium">
+<strong class="font-bold">⚠️ Data Simulasi</strong> — Koordinat merupakan ilustrasi untuk latihan operasional &amp; pemantauan dwell time.
+          </p>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container-lowest shadow-xs text-xs">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-sm text-[11px] text-on-surface-variant font-semibold">Mode Simulasi Hub Ops</span>
+</div>
+</div>
+<!-- Priority Rule Sub-banner -->
+<div class="px-4 sm:px-space-md lg:px-space-margin-desktop py-1.5 bg-surface-container-low flex flex-wrap items-center justify-between gap-2 border-b border-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] flex-shrink-0">rule</span>
+<span class="font-label-sm text-xs sm:text-label-sm text-on-surface-variant">
+<strong class="text-primary font-bold">Aturan Prioritas (Latihan):</strong> Mean dwell ≥ 6.00 jam — Ini adalah aturan training investigasi, bukan SLA resmi Anteraja.
+          </span>
+</div>
+<span class="hidden md:inline-block font-label-sm text-label-sm text-outline">Target Evaluasi Ops Harian</span>
+</div>
+<!-- ========================================== -->
+<!-- PAGE 1: HUB DWELL MONITOR (CURRENT ACTIVE) -->
+<!-- ========================================== -->
+<section class="page-view flex flex-col p-3 sm:p-space-md lg:p-space-margin-desktop gap-space-md sm:gap-space-lg w-full max-w-full" id="page-hub-dwell-monitor">
+<!-- KPI Strip: 4 Cards Responsive Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-space-md">
+<!-- KPI 1: Total Hub -->
+<div class="lg:col-span-3 bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Total Hub</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+</div>
+</div>
+<div>
+<div class="font-metric-display text-metric-display text-on-surface">6 Hub</div>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Status: Terpantau Aktif</span>
+</div>
+</div>
+</div>
+<!-- KPI 2: Total Jumlah Paket -->
+<div class="lg:col-span-3 bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Total Jumlah Paket</span>
+<div class="w-8 h-8 rounded-lg bg-tertiary-fixed flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+</div>
+</div>
+<div>
+<div class="font-metric-display text-metric-display text-on-surface">10.000</div>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Distribusi merata ~1.666/hub</span>
+</div>
+</div>
+</div>
+<!-- KPI 3: Hub Prioritas Investigasi -->
+<div class="lg:col-span-3 bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm text-primary font-bold uppercase tracking-wider">Hub Prioritas Investigasi</span>
+<div class="w-8 h-8 rounded-lg bg-error-container flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">priority_high</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-metric-display text-metric-display text-primary">3 Hub</span>
+<span class="font-label-sm text-label-sm text-secondary-container font-bold">(50%)</span>
+</div>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Kriteria: Mean dwell ≥ 6.00 jam</span>
+</div>
+</div>
+</div>
+<!-- Top 3 Dwell Ranking Tile -->
+<div class="lg:col-span-3 bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex flex-col justify-between">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Top 3 Dwell Time Global</span>
+<span class="material-symbols-outlined text-[18px] text-secondary">trending_up</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between py-1 cursor-pointer hover:bg-surface-container-low px-1 rounded transition-colors" onclick="selectHub('HUB_UPG', true)">
+<span class="font-body-sm text-body-sm text-on-surface font-semibold flex items-center gap-1.5">
+<span class="w-4 h-4 rounded-full bg-primary-container text-on-primary text-[10px] flex items-center justify-center font-bold">1</span>
+                  Makassar Hub
+                </span>
+<span class="px-2 py-0.5 rounded-full bg-error-container text-primary text-[11px] font-metric-display font-bold">12.99 jam</span>
+</div>
+<div class="flex items-center justify-between py-1 cursor-pointer hover:bg-surface-container-low px-1 rounded transition-colors" onclick="selectHub('HUB_MDN', true)">
+<span class="font-body-sm text-body-sm text-on-surface font-semibold flex items-center gap-1.5">
+<span class="w-4 h-4 rounded-full bg-secondary-container text-on-secondary text-[10px] flex items-center justify-center font-bold">2</span>
+                  Medan Hub
+                </span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-secondary text-[11px] font-metric-display font-bold">10.01 jam</span>
+</div>
+<div class="flex items-center justify-between py-1 cursor-pointer hover:bg-surface-container-low px-1 rounded transition-colors" onclick="selectHub('HUB_SUB', true)">
+<span class="font-body-sm text-body-sm text-on-surface font-semibold flex items-center gap-1.5">
+<span class="w-4 h-4 rounded-full bg-secondary-container text-on-secondary text-[10px] flex items-center justify-center font-bold">3</span>
+                  Surabaya Hub
+                </span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-secondary text-[11px] font-metric-display font-bold">6.98 jam</span>
+</div>
+</div>
+</div>
+</div>
+<!-- IN-BODY WORK AREA: Filtering & Pencarian (Prominent, above Map and List) -->
+<div class="bg-surface-container-lowest p-3 sm:p-space-md rounded-xl shadow-xs border border-surface-container-high/60 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+<!-- Search & Filter Controls -->
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-outline">search</span>
+<input aria-label="Cari nama hub atau ID" class="w-full min-h-[44px] pl-10 pr-4 py-2 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest border border-transparent focus:border-primary-container transition-all" id="hubSearchInput" oninput="handleSearch(this.value)" placeholder="Cari nama hub atau ID (contoh: Makassar, Medan, HUB_UPG)..." type="text"/>
+</div>
+<!-- Filter Tabs (min-h-[44px] for comfortable touch) -->
+<div class="flex items-center bg-surface-container-low p-1 rounded-lg gap-1">
+<button class="min-h-[44px] flex-1 sm:flex-none px-4 py-2 rounded-lg font-label-lg text-label-lg transition-all bg-surface-container-lowest text-primary font-bold shadow-xs whitespace-nowrap active:scale-95" id="filterAllBtn" onclick="setFilter('all')">
+              Semua Hub (6)
+            </button>
+<button class="min-h-[44px] flex-1 sm:flex-none px-4 py-2 rounded-lg font-label-lg text-label-lg transition-all text-on-surface-variant hover:text-on-surface whitespace-nowrap active:scale-95" id="filterPriorityBtn" onclick="setFilter('priority')">
+              Prioritas Investigasi (3)
+            </button>
+</div>
+</div>
+<!-- State Simulation Controls -->
+<div class="flex items-center gap-1.5 self-start md:self-auto flex-wrap pt-1 md:pt-0">
+<span class="font-label-sm text-[11px] text-outline font-semibold uppercase tracking-wider mr-1">Simulasi UI:</span>
+<button class="min-h-[36px] px-3 py-1 rounded bg-primary-container text-on-primary font-label-sm text-xs font-semibold transition-all" id="simStateNormal" onclick="setSimState('normal')">Normal</button>
+<button class="min-h-[36px] px-3 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-xs transition-all" id="simStateLoading" onclick="setSimState('loading')">Loading</button>
+<button class="min-h-[36px] px-3 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-xs transition-all" id="simStateEmpty" onclick="setSimState('empty')">Kosong</button>
+<button class="min-h-[36px] px-3 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-xs transition-all" id="simStateError" onclick="setSimState('error')">Eror</button>
+</div>
+</div>
+<!-- Error State Banner -->
+<div class="hidden bg-error-container text-on-error-container p-space-md rounded-xl shadow-xs items-center justify-between" id="simErrorBanner">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[24px]">error</span>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-bold">Gagal memuat koordinat koneksi telemetry latihan</span>
+<span class="font-body-sm text-body-sm">Sistem simulasi gagal melakukan sinkronisasi dengan endpoint telemetry perutean. Silakan coba kembali.</span>
+</div>
+</div>
+<button class="min-h-[44px] px-space-md py-2 bg-primary text-on-primary rounded-lg font-label-lg text-label-lg font-semibold shadow-xs hover:opacity-95" onclick="setSimState('normal')">
+          Coba Lagi
+        </button>
+</div>
+<!-- SIDE-BY-SIDE ON DESKTOP 1440px / STACKED ON MOBILE 390px (Peta di atas 320px, daftar di bawah) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md lg:gap-space-lg items-start w-full max-w-full" id="mainDashboardView">
+<!-- LEFT COLUMN: LEAFLET MAP CONTAINER (h-[320px] on mobile 390px, h-[420px] on desktop 1440px) -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded-xl overflow-hidden shadow-xs border border-surface-container-high/60 flex flex-col w-full max-w-full">
+<!-- Map Header bar -->
+<div class="px-space-md py-3 bg-surface-container-low flex flex-wrap items-center justify-between gap-2 border-b border-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">map</span>
+<span class="font-label-lg text-label-lg text-on-surface font-bold">Peta Dwell Distribusi Hub Nasional</span>
+</div>
+<!-- Legend -->
+<div class="flex items-center gap-3 text-xs">
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-full bg-primary-container inline-block"></span>
+<span class="font-label-sm text-label-sm text-on-surface font-medium">Prioritas (≥ 6 jam)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-full bg-tertiary-container inline-block"></span>
+<span class="font-label-sm text-label-sm text-on-surface font-medium">Normal (&lt; 6 jam)</span>
+</div>
+</div>
+</div>
+<!-- The Leaflet container (h-[320px] on mobile, h-[420px] on desktop 1440px) -->
+<div class="relative w-full h-[320px] lg:h-[420px] bg-surface-container-low">
+<div class="w-full h-full z-10" id="anterajaMap"></div>
+<!-- Map Overlay Floating Instruction -->
+<div class="hidden sm:flex absolute top-3 left-14 z-[400] bg-surface-container-lowest/90 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-md items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">touch_app</span>
+<span class="font-label-sm text-label-sm text-on-surface">Klik pin untuk memusatkan &amp; melihat detail investigasi</span>
+</div>
+<!-- Reset Map View Button -->
+<button class="absolute bottom-4 left-4 z-[400] min-h-[36px] px-3 py-1.5 bg-surface-container-lowest/95 backdrop-blur-xs rounded-lg shadow-md hover:bg-surface-container-low text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1.5 transition-all" onclick="resetMapView()" title="Reset tampilan seluruh Indonesia">
+<span class="material-symbols-outlined text-[16px]">crop_free</span>
+            Reset Zoom Indonesia
+          </button>
+</div>
+</div>
+<!-- RIGHT COLUMN: DETAIL PANEL & HUB LIST (Stacked cleanly without overlapping) -->
+<div class="lg:col-span-5 flex flex-col gap-space-md w-full max-w-full">
+<!-- Selected Hub Detail Panel with clear close button (✕ / Tutup) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 transition-all" id="detailPanel">
+<div class="flex items-center justify-between pb-space-sm mb-space-sm border-b border-surface-container-high">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]">assignment</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Detail Investigasi Hub</h3>
+</div>
+<button aria-label="Tutup Detail Panel" class="min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center text-outline hover:bg-surface-container hover:text-on-surface transition-all" onclick="closeDetailPanel()" title="Tutup Panel">
+<span class="material-symbols-outlined text-[24px]">close</span>
+</button>
+</div>
+<!-- Detail Panel Content -->
+<div class="flex flex-col gap-space-sm" id="detailPanelContent">
+<div class="flex items-center justify-between flex-wrap gap-2">
+<div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-metric-display font-semibold" id="detailHubId">HUB_UPG</span>
+<h4 class="font-headline-md text-headline-md text-on-surface font-bold mt-1" id="detailHubName">Makassar Hub</h4>
+</div>
+<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-error-container text-primary flex items-center gap-1" id="detailPriorityBadge">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+                Perlu Investigasi Cepat
+              </span>
+</div>
+<!-- Detail Metrics (Explicitly showing 'jam' units) -->
+<div class="grid grid-cols-2 gap-space-sm mt-space-xs">
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Jumlah Paket</span>
+<div class="font-metric-display text-[22px] text-on-surface mt-0.5 font-bold" id="detailPackages">1666</div>
+<span class="font-body-sm text-[11px] text-outline">Paket simulasi</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Mean Dwell Time</span>
+<div class="font-metric-display text-[22px] text-primary mt-0.5 font-bold" id="detailMeanDwell">12.99 jam</div>
+<span class="font-body-sm text-[11px] text-outline">Kriteria ≥ 6.00 jam</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Median Dwell Time</span>
+<div class="font-metric-display text-[22px] text-on-surface mt-0.5 font-bold" id="detailMedianDwell">12.98 jam</div>
+<span class="font-body-sm text-[11px] text-outline">Distribusi tengah</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Status Investigasi</span>
+<div class="font-label-lg text-label-lg font-bold text-secondary-container mt-1" id="detailStatusText">Prioritas Investigasi (≥ 6.00 jam)</div>
+<span class="font-body-sm text-[11px] text-outline">Sesuai aturan latihan</span>
+</div>
+</div>
+<!-- Detail Action Buttons (touch friendly >= 44px) -->
+<div class="flex items-center gap-space-sm mt-space-sm pt-space-xs flex-col sm:flex-row">
+<button class="w-full sm:flex-1 min-h-[44px] py-2 px-space-md rounded-lg bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-lg text-label-lg font-semibold flex items-center justify-center gap-1.5 transition-all" id="btnFocusMap" onclick="focusCurrentHubOnMap()">
+<span class="material-symbols-outlined text-[18px]">my_location</span>
+                Fokuskan di Peta
+              </button>
+<button class="w-full sm:flex-1 min-h-[44px] py-2 px-space-md rounded-lg bg-primary-container text-on-primary font-label-lg text-label-lg font-semibold flex items-center justify-center gap-1.5 hover:opacity-95 shadow-xs transition-all" id="btnMarkReviewed" onclick="markAsReviewed()">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+                Tandai Selesai Tinjau
+              </button>
+</div>
+</div>
+</div>
+<!-- Hub List Container -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-xs border border-surface-container-high/60 w-full max-w-full">
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">list_alt</span>
+<span class="font-label-lg text-label-lg text-on-surface font-bold">Daftar Pemantauan Hub</span>
+</div>
+<span class="font-label-sm text-[11px] px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-semibold" id="hubListCounter">
+              Menampilkan 6 dari 6 hub
+            </span>
+</div>
+<!-- Loading Skeleton -->
+<div class="hidden flex-col gap-space-sm py-2" id="loadingSkeleton">
+<div class="p-space-md rounded-xl bg-surface-container-low animate-pulse flex flex-col gap-2">
+<div class="h-4 bg-surface-container-highest rounded w-1/3"></div>
+<div class="h-6 bg-surface-container-highest rounded w-2/3"></div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low animate-pulse flex flex-col gap-2">
+<div class="h-4 bg-surface-container-highest rounded w-1/4"></div>
+<div class="h-6 bg-surface-container-highest rounded w-3/4"></div>
+</div>
+</div>
+<!-- Empty State -->
+<div class="hidden flex-col items-center justify-center py-12 px-4 text-center" id="emptyStateContainer">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-outline mb-space-sm">
+<span class="material-symbols-outlined text-[36px]">inventory_2</span>
+</div>
+<h5 class="font-headline-sm text-headline-sm text-on-surface font-bold">Tidak ada hub yang sesuai kriteria</h5>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-xs mt-1">
+              Coba sesuaikan kata kunci pencarian atau ubah filter tab ke status 'Semua Hub'.
+            </p>
+<button class="mt-4 min-h-[44px] px-4 py-2 rounded-lg bg-primary-container text-on-primary font-label-lg text-label-lg font-semibold shadow-xs" onclick="resetFilters()">
+              Reset Pencarian
+            </button>
+</div>
+<!-- Actual Hub Cards Container -->
+<div class="flex flex-col gap-space-sm max-h-[450px] overflow-y-auto pr-1" id="hubCardsList">
+<!-- Rendered dynamically via JS -->
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================== -->
+<!-- PAGE 2: ANTREAN PAKET (PACKAGE QUEUE)     -->
+<!-- ========================================== -->
+<section class="page-view hidden flex-col p-3 sm:p-space-md lg:p-space-margin-desktop gap-space-md sm:gap-space-lg w-full max-w-full" id="page-antrean-paket">
+<!-- Queue KPI Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-semibold uppercase">Total Antrean Aktif</span>
+<div class="font-metric-display text-metric-display text-on-surface mt-1">10.000</div>
+<span class="font-body-sm text-xs text-on-surface-variant">Tersebar di 6 Hub Utama</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-tertiary-fixed text-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">inventory_2</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-primary font-semibold uppercase">Antrean Kritis (&gt; 4 Jam)</span>
+<div class="font-metric-display text-metric-display text-primary mt-1">4.999</div>
+<span class="font-body-sm text-xs text-primary font-medium">Makassar, Medan, Surabaya</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-error-container text-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">timer_off</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-semibold uppercase">Kapasitas Sorter Rata-rata</span>
+<div class="font-metric-display text-metric-display text-secondary-container mt-1">84.2%</div>
+<span class="font-body-sm text-xs text-on-surface-variant">Sorter throughput stabil</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">speed</span>
+</div>
+</div>
+</div>
+<!-- Filter Bar Antrean Paket -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-xs border border-surface-container-high/60 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-md">
+<div class="flex flex-wrap items-center gap-space-sm flex-1">
+<div class="relative min-w-[220px] flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+<input class="w-full min-h-[44px] pl-9 pr-3 py-2 text-body-sm rounded-lg bg-surface-container-low border border-transparent focus:border-primary-container focus:bg-surface-container-lowest outline-none transition-all" id="queueSearchInput" oninput="filterQueueTable()" placeholder="Cari No. Resi AWB atau Hub..." type="text"/>
+</div>
+<select class="min-h-[44px] px-3 py-2 text-body-sm rounded-lg bg-surface-container-low border border-transparent focus:border-primary-container outline-none text-on-surface font-medium" id="queueHubFilter" onchange="filterQueueTable()">
+<option value="ALL">Semua Hub (6 Hub)</option>
+<option value="HUB_UPG">Makassar Hub (1666)</option>
+<option value="HUB_MDN">Medan Hub (1667)</option>
+<option value="HUB_SUB">Surabaya Hub (1667)</option>
+<option value="HUB_SRG">Semarang Hub (1666)</option>
+<option value="HUB_BDO">Bandung Hub (1667)</option>
+<option value="HUB_CGK">Jakarta Hub (1667)</option>
+</select>
+<select class="min-h-[44px] px-3 py-2 text-body-sm rounded-lg bg-surface-container-low border border-transparent focus:border-primary-container outline-none text-on-surface font-medium" id="queueStatusFilter" onchange="filterQueueTable()">
+<option value="ALL">Semua Status Tahapan</option>
+<option value="Paket Masuk">Paket Masuk</option>
+<option value="Dalam Sortir">Dalam Sortir</option>
+<option value="Menunggu Muat">Menunggu Muat</option>
+<option value="Siap Dikirim">Siap Dikirim</option>
+</select>
+</div>
+<button class="min-h-[44px] px-space-md py-2 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high font-label-lg text-label-lg flex items-center justify-center gap-1.5 transition-all" onclick="refreshQueueData()">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+          Segarkan Antrean
+        </button>
+</div>
+<!-- Queue Interactive Data Table -->
+<div class="bg-surface-container-lowest rounded-xl shadow-xs border border-surface-container-high/60 overflow-hidden w-full max-w-full">
+<div class="p-space-md border-b border-surface-container-high flex items-center justify-between">
+<h4 class="font-headline-sm text-headline-sm font-bold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]">pending_actions</span>
+            Daftar Antrean Paket Telemetry Ops
+          </h4>
+<span class="text-xs font-semibold px-2.5 py-1 bg-surface-container rounded-full text-on-surface-variant" id="queueTableCounter">Menampilkan 10 Sampel Antrean Real-time</span>
+</div>
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left text-body-sm border-collapse min-w-[760px]">
+<thead class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<tr>
+<th class="py-3 px-4">No. Resi (AWB)</th>
+<th class="py-3 px-4">Hub Asal</th>
+<th class="py-3 px-4">Hub Transit / Posisi</th>
+<th class="py-3 px-4">Status Antrean</th>
+<th class="py-3 px-4">Estimasi Selesai</th>
+<th class="py-3 px-4">Dwell Current</th>
+<th class="py-3 px-4 text-center">Aksi Cepat</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-high" id="queueTableBody">
+<!-- Populated via Javascript -->
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- ============================================== -->
+<!-- PAGE 3: SLA CLEARANCE ALERTS (ALERTS MONITOR)  -->
+<!-- ============================================== -->
+<section class="page-view hidden flex-col p-3 sm:p-space-md lg:p-space-margin-desktop gap-space-md sm:gap-space-lg w-full max-w-full" id="page-sla-clearance-alerts">
+<!-- SLA Alerts Summary Hero -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-error-container text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[30px]" style="font-variation-settings: 'FILL' 1;">emergency_home</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Pusat Alert &amp; Pelanggaran Dwell Hub</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Peringatan dini eskalasi dwelling hub melebihi batas latihan 6.00 jam operasional.
+            </p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="min-h-[44px] px-4 py-2 bg-primary-container text-on-primary font-label-lg text-label-lg font-semibold rounded-lg hover:opacity-95 shadow-xs transition-all flex items-center gap-1.5" onclick="bulkAcknowledgeAlerts()">
+<span class="material-symbols-outlined text-[18px]">done_all</span>
+            Tandai Semua Ditinjau
+          </button>
+</div>
+</div>
+<!-- 3 Priority Hubs Breach Countdown Strip -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Makassar Hub Alert -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-xs border-2 border-primary-container flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-error-container text-primary flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-ping"></span>
+                KRITIS TINGKAT 1
+              </span>
+<span class="font-mono text-xs font-bold text-on-surface-variant">HUB_UPG</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm font-bold text-on-surface">Makassar Hub</h4>
+<p class="font-body-sm text-xs text-on-surface-variant mt-0.5">Sulawesi Selatan — 1.666 Paket simulasi</p>
+<div class="mt-3 p-2.5 rounded-lg bg-surface-container-low flex flex-col gap-1">
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Mean Dwell Time:</span>
+<span class="font-mono font-bold text-primary text-sm">12.99 jam</span>
+</div>
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Deviasi vs Batas Latihan:</span>
+<span class="font-mono font-bold text-error">+6.99 jam (Breach)</span>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-surface-container flex gap-2">
+<button class="flex-1 min-h-[44px] py-1.5 px-2 bg-primary text-on-primary rounded font-label-sm text-xs font-bold text-center hover:opacity-90" onclick="triggerAlertAction('HUB_UPG', 'Tugaskan Tim Ops')">
+              Tugaskan Tim Ops
+            </button>
+<button class="flex-1 min-h-[44px] py-1.5 px-2 bg-surface-container text-on-surface rounded font-label-sm text-xs font-bold text-center hover:bg-surface-container-high" onclick="triggerAlertAction('HUB_UPG', 'Notif Driver')">
+              Notif Driver
+            </button>
+</div>
+</div>
+<!-- Medan Hub Alert -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-xs border-2 border-secondary-container flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-secondary-fixed text-secondary flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+                KRITIS TINGKAT 2
+              </span>
+<span class="font-mono text-xs font-bold text-on-surface-variant">HUB_MDN</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm font-bold text-on-surface">Medan Hub</h4>
+<p class="font-body-sm text-xs text-on-surface-variant mt-0.5">Sumatera Utara — 1.667 Paket simulasi</p>
+<div class="mt-3 p-2.5 rounded-lg bg-surface-container-low flex flex-col gap-1">
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Mean Dwell Time:</span>
+<span class="font-mono font-bold text-secondary text-sm">10.01 jam</span>
+</div>
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Deviasi vs Batas Latihan:</span>
+<span class="font-mono font-bold text-secondary-container">+4.01 jam (Breach)</span>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-surface-container flex gap-2">
+<button class="flex-1 min-h-[44px] py-1.5 px-2 bg-primary text-on-primary rounded font-label-sm text-xs font-bold text-center hover:opacity-90" onclick="triggerAlertAction('HUB_MDN', 'Tugaskan Tim Ops')">
+              Tugaskan Tim Ops
+            </button>
+<button class="flex-1 min-h-[44px] py-1.5 px-2 bg-surface-container text-on-surface rounded font-label-sm text-xs font-bold text-center hover:bg-surface-container-high" onclick="triggerAlertAction('HUB_MDN', 'Notif Driver')">
+              Notif Driver
+            </button>
+</div>
+</div>
+<!-- Surabaya Hub Alert -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-xs border-2 border-secondary flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-secondary-fixed text-secondary flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                PERINGATAN AWAL
+              </span>
+<span class="font-mono text-xs font-bold text-on-surface-variant">HUB_SUB</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm font-bold text-on-surface">Surabaya Hub</h4>
+<p class="font-body-sm text-xs text-on-surface-variant mt-0.5">Jawa Timur — 1.667 Paket simulasi</p>
+<div class="mt-3 p-2.5 rounded-lg bg-surface-container-low flex flex-col gap-1">
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Mean Dwell Time:</span>
+<span class="font-mono font-bold text-secondary text-sm">6.98 jam</span>
+</div>
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Deviasi vs Batas Latihan:</span>
+<span class="font-mono font-bold text-secondary-container">+0.98 jam (Breach)</span>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-surface-container flex gap-2">
+<button class="flex-1 min-h-[44px] py-1.5 px-2 bg-primary text-on-primary rounded font-label-sm text-xs font-bold text-center hover:opacity-90" onclick="triggerAlertAction('HUB_SUB', 'Tugaskan Tim Ops')">
+              Tugaskan Tim Ops
+            </button>
+<button class="flex-1 min-h-[44px] py-1.5 px-2 bg-surface-container text-on-surface rounded font-label-sm text-xs font-bold text-center hover:bg-surface-container-high" onclick="triggerAlertAction('HUB_SUB', 'Notif Driver')">
+              Notif Driver
+            </button>
+</div>
+</div>
+</div>
+<!-- Alert Feed Activity Stream -->
+<div class="bg-surface-container-lowest rounded-xl shadow-xs border border-surface-container-high/60 p-space-md">
+<div class="flex items-center justify-between pb-3 border-b border-surface-container">
+<h4 class="font-headline-sm text-headline-sm font-bold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">notifications_active</span>
+            Feed Log Alert Real-Time
+          </h4>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-sm text-xs text-on-surface-variant">Sinkronisasi telemetry aktif</span>
+</div>
+</div>
+<div class="flex flex-col divide-y divide-surface-container-high mt-2" id="alertFeedList">
+<!-- Dynamic alerts -->
+</div>
+</div>
+</section>
+<!-- ============================================== -->
+<!-- PAGE 4: PETA DISTRIBUSI HUB (DISTRIBUTION MAP) -->
+<!-- ============================================== -->
+<section class="page-view hidden flex-col p-3 sm:p-space-md lg:p-space-margin-desktop gap-space-md sm:gap-space-lg w-full max-w-full" id="page-peta-distribusi-hub">
+<!-- Distribution Controls & KPI Bar -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">alt_route</span>
+</div>
+<div>
+<span class="font-label-sm text-xs text-on-surface-variant font-semibold uppercase">Jalur Terpadat</span>
+<div class="font-label-lg font-bold text-on-surface">Makassar ⇄ Surabaya</div>
+<span class="font-body-sm text-xs text-primary font-mono font-bold">12.99 jam / 1.666 pck</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-secondary-fixed text-secondary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">shutter_speed</span>
+</div>
+<div>
+<span class="font-label-sm text-xs text-on-surface-variant font-semibold uppercase">Rata-rata Dwell Global</span>
+<div class="font-metric-display text-[22px] font-bold text-on-surface">6.83 jam</div>
+<span class="font-body-sm text-xs text-on-surface-variant">Kombinasi 6 Hub</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-tertiary-fixed text-tertiary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">flowsheet</span>
+</div>
+<div>
+<span class="font-label-sm text-xs text-on-surface-variant font-semibold uppercase">Total Lintasan Rute</span>
+<div class="font-label-lg font-bold text-on-surface">5 Inter-Hub Trunk Lines</div>
+<span class="font-body-sm text-xs text-on-surface-variant">Konektivitas penuh</span>
+</div>
+</div>
+</div>
+<!-- Fullscreen Leaflet Interactive Distribution Map Container -->
+<div class="bg-surface-container-lowest rounded-xl shadow-xs border border-surface-container-high/60 overflow-hidden flex flex-col w-full max-w-full">
+<!-- Map control header -->
+<div class="px-space-md py-3 bg-surface-container-low flex flex-wrap items-center justify-between gap-3 border-b border-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">explore</span>
+<h4 class="font-label-lg text-label-lg text-on-surface font-bold">Peta Koridor Logistik &amp; Arus Paket Latihan</h4>
+</div>
+<!-- Layer Toggles -->
+<div class="flex items-center gap-2 flex-wrap">
+<label class="flex items-center gap-1.5 text-xs text-on-surface cursor-pointer select-none bg-surface-container-lowest px-2.5 py-1 rounded-md shadow-xs">
+<input checked="" class="rounded text-primary-container focus:ring-primary-container" id="toggleLines" onchange="toggleFlowMapLines()" type="checkbox"/>
+<span class="font-medium">Garis Lintasan Antar-Hub</span>
+</label>
+<label class="flex items-center gap-1.5 text-xs text-on-surface cursor-pointer select-none bg-surface-container-lowest px-2.5 py-1 rounded-md shadow-xs">
+<input checked="" class="rounded text-primary-container focus:ring-primary-container" id="toggleMarkers" onchange="toggleFlowMapMarkers()" type="checkbox"/>
+<span class="font-medium">Marker &amp; Popups</span>
+</label>
+</div>
+</div>
+<!-- The Leaflet container for Full Route Flow -->
+<div class="relative w-full h-[360px] sm:h-[450px] lg:h-[550px] bg-surface-container-low">
+<div class="w-full h-full z-10" id="distributionFlowMap"></div>
+<div class="absolute bottom-4 left-4 z-[400] bg-surface-container-lowest/90 backdrop-blur-xs px-3 py-2 rounded-lg shadow-md text-xs flex flex-col gap-1 max-w-xs">
+<div class="font-bold text-on-surface">Petunjuk Koridor Distribusi:</div>
+<div class="flex items-center gap-2">
+<div class="w-5 h-1 bg-primary-container rounded"></div>
+<span class="text-on-surface-variant">Arus Dwell Tinggi (&gt;6 jam)</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-5 h-1 bg-tertiary-container rounded"></div>
+<span class="text-on-surface-variant">Arus Dwell Normal (&lt;6 jam)</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ============================================== -->
+<!-- PAGE 5: LAPORAN ANALITIK (ANALYTICS REPORT)   -->
+<!-- ============================================== -->
+<section class="page-view hidden flex-col p-3 sm:p-space-md lg:p-space-margin-desktop gap-space-md sm:gap-space-lg w-full max-w-full" id="page-laporan-analitik">
+<!-- Header & Export Actions -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Laporan Analitik Kinerja Hub &amp; Dwell</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Ringkasan komparasi dwelling time, median, serta tingkat kepatuhan SLA 6 hub simulasi.
+            </p>
+</div>
+<!-- Export Buttons -->
+<div class="flex items-center gap-2 flex-wrap">
+<button class="min-h-[44px] px-3 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-label-sm text-xs font-semibold flex items-center gap-1.5 transition-all" onclick="handleExport('csv')">
+<span class="material-symbols-outlined text-[16px]">download</span>
+              Unduh CSV
+            </button>
+<button class="min-h-[44px] px-3 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-label-sm text-xs font-semibold flex items-center gap-1.5 transition-all" onclick="handleExport('pdf')">
+<span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+              Cetak Laporan PDF
+            </button>
+<button class="min-h-[44px] px-3 py-2 rounded-lg bg-primary-container text-on-primary font-label-sm text-xs font-semibold flex items-center gap-1.5 hover:opacity-95 shadow-xs transition-all" onclick="handleExport('email')">
+<span class="material-symbols-outlined text-[16px]">send</span>
+              Kirim Ringkasan Mingguan
+            </button>
+</div>
+</div>
+<!-- Visual Analytics Grid: Dwell Bar Comparison & SLA Health Breakdown -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Dwell Time Bar Comparison Chart -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex flex-col justify-between">
+<div class="flex items-center justify-between pb-3 border-b border-surface-container">
+<div>
+<h4 class="font-headline-sm text-headline-sm font-bold text-on-surface">Perbandingan Mean Dwell Time Antar-Hub</h4>
+<p class="font-body-sm text-xs text-on-surface-variant">Garis referensi batas latihan operasional: 6.00 jam</p>
+</div>
+<span class="font-label-sm text-xs font-bold px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-mono">Total 10.000 Paket</span>
+</div>
+<!-- Custom High-Fidelity Bar Chart with explicit 'jam' units -->
+<div class="mt-6 flex flex-col gap-4">
+<!-- Makassar -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-xs">
+<span class="font-bold text-on-surface">Makassar Hub (HUB_UPG)</span>
+<span class="font-mono font-bold text-primary">12.99 jam (1.666 pck)</span>
+</div>
+<div class="w-full bg-surface-container h-6 rounded-md overflow-hidden relative flex items-center">
+<div class="bg-primary-container h-full rounded-md transition-all duration-700" style="width: 96%;"></div>
+<span class="absolute right-2 text-[10px] font-bold text-on-surface-variant font-mono">96% Kapasitas</span>
+</div>
+</div>
+<!-- Medan -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-xs">
+<span class="font-bold text-on-surface">Medan Hub (HUB_MDN)</span>
+<span class="font-mono font-bold text-secondary-container">10.01 jam (1.667 pck)</span>
+</div>
+<div class="w-full bg-surface-container h-6 rounded-md overflow-hidden relative flex items-center">
+<div class="bg-secondary-container h-full rounded-md transition-all duration-700" style="width: 74%;"></div>
+<span class="absolute right-2 text-[10px] font-bold text-on-surface-variant font-mono">74% Kapasitas</span>
+</div>
+</div>
+<!-- Surabaya -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-xs">
+<span class="font-bold text-on-surface">Surabaya Hub (HUB_SUB)</span>
+<span class="font-mono font-bold text-secondary">6.98 jam (1.667 pck)</span>
+</div>
+<div class="w-full bg-surface-container h-6 rounded-md overflow-hidden relative flex items-center">
+<div class="bg-secondary-fixed-dim h-full rounded-md transition-all duration-700" style="width: 52%;"></div>
+<span class="absolute right-2 text-[10px] font-bold text-on-surface-variant font-mono">52% Kapasitas</span>
+</div>
+</div>
+<!-- Semarang -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-xs">
+<span class="font-bold text-on-surface">Semarang Hub (HUB_SRG)</span>
+<span class="font-mono font-bold text-tertiary">5.00 jam (1.666 pck)</span>
+</div>
+<div class="w-full bg-surface-container h-6 rounded-md overflow-hidden relative flex items-center">
+<div class="bg-tertiary-container h-full rounded-md transition-all duration-700" style="width: 37%;"></div>
+<span class="absolute right-2 text-[10px] font-bold text-on-surface-variant font-mono">37% Standar</span>
+</div>
+</div>
+<!-- Bandung -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-xs">
+<span class="font-bold text-on-surface">Bandung Hub (HUB_BDO)</span>
+<span class="font-mono font-bold text-tertiary">3.99 jam (1.667 pck)</span>
+</div>
+<div class="w-full bg-surface-container h-6 rounded-md overflow-hidden relative flex items-center">
+<div class="bg-tertiary h-full rounded-md transition-all duration-700" style="width: 30%;"></div>
+<span class="absolute right-2 text-[10px] font-bold text-on-surface-variant font-mono">30% Optimal</span>
+</div>
+</div>
+<!-- Jakarta -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-xs">
+<span class="font-bold text-on-surface">Jakarta Hub (HUB_CGK)</span>
+<span class="font-mono font-bold text-tertiary">2.04 jam (1.667 pck)</span>
+</div>
+<div class="w-full bg-surface-container h-6 rounded-md overflow-hidden relative flex items-center">
+<div class="bg-tertiary-fixed-dim h-full rounded-md transition-all duration-700" style="width: 15%;"></div>
+<span class="absolute right-2 text-[10px] font-bold text-on-surface-variant font-mono">15% Sangat Cepat</span>
+</div>
+</div>
+</div>
+<!-- Legend strip -->
+<div class="mt-6 pt-4 border-t border-surface-container flex flex-wrap items-center justify-between gap-2 text-xs">
+<span class="text-on-surface-variant">Batas ambang latihan operasional (6.00 jam)</span>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded bg-primary-container"></div>
+<span>≥ 6.00 Jam (Perlu Tindakan)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded bg-tertiary-container"></div>
+<span>&lt; 6.00 Jam (Memenuhi Kriteria)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Kepatuhan SLA per Hub & Distribusi 10.000 Paket -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex flex-col">
+<div class="flex items-center justify-between pb-3 border-b border-surface-container">
+<h4 class="font-headline-sm text-headline-sm font-bold text-on-surface">Kepatuhan SLA per Hub</h4>
+<span class="font-label-sm text-xs font-semibold text-primary">Target: 95.0%</span>
+</div>
+<div class="mt-4 flex flex-col gap-3">
+<!-- Jakarta 99% -->
+<div class="flex items-center justify-between text-xs">
+<span class="font-medium text-on-surface">Jakarta Hub</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full w-[99%]"></div>
+</div>
+<span class="font-mono font-bold text-on-surface w-9 text-right">99%</span>
+</div>
+</div>
+<!-- Bandung 98% -->
+<div class="flex items-center justify-between text-xs">
+<span class="font-medium text-on-surface">Bandung Hub</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full w-[98%]"></div>
+</div>
+<span class="font-mono font-bold text-on-surface w-9 text-right">98%</span>
+</div>
+</div>
+<!-- Semarang 95% -->
+<div class="flex items-center justify-between text-xs">
+<span class="font-medium text-on-surface">Semarang Hub</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full w-[95%]"></div>
+</div>
+<span class="font-mono font-bold text-on-surface w-9 text-right">95%</span>
+</div>
+</div>
+<!-- Surabaya 82% -->
+<div class="flex items-center justify-between text-xs">
+<span class="font-medium text-on-surface">Surabaya Hub</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary-container h-full w-[82%]"></div>
+</div>
+<span class="font-mono font-bold text-secondary-container w-9 text-right">82%</span>
+</div>
+</div>
+<!-- Medan 58% -->
+<div class="flex items-center justify-between text-xs">
+<span class="font-medium text-on-surface">Medan Hub</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary-container h-full w-[58%]"></div>
+</div>
+<span class="font-mono font-bold text-secondary-container w-9 text-right">58%</span>
+</div>
+</div>
+<!-- Makassar 42% -->
+<div class="flex items-center justify-between text-xs">
+<span class="font-medium text-on-surface">Makassar Hub</span>
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[42%]"></div>
+</div>
+<span class="font-mono font-bold text-primary w-9 text-right">42%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Paket Distribution Matrix Table -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-xs border border-surface-container-high/60 flex flex-col">
+<div class="flex items-center justify-between pb-2 border-b border-surface-container">
+<span class="font-label-lg font-bold text-on-surface">Distribusi Paket Simulasi</span>
+<span class="font-mono text-xs font-bold text-primary">Total: 10.000</span>
+</div>
+<div class="text-xs text-on-surface-variant mt-2 flex flex-col gap-1.5 font-body-sm">
+<div class="flex justify-between py-1 border-b border-surface-container-low">
+<span>Makassar Hub (HUB_UPG)</span>
+<span class="font-mono font-bold text-on-surface">1.666 paket</span>
+</div>
+<div class="flex justify-between py-1 border-b border-surface-container-low">
+<span>Medan Hub (HUB_MDN)</span>
+<span class="font-mono font-bold text-on-surface">1.667 paket</span>
+</div>
+<div class="flex justify-between py-1 border-b border-surface-container-low">
+<span>Surabaya Hub (HUB_SUB)</span>
+<span class="font-mono font-bold text-on-surface">1.667 paket</span>
+</div>
+<div class="flex justify-between py-1 border-b border-surface-container-low">
+<span>Semarang Hub (HUB_SRG)</span>
+<span class="font-mono font-bold text-on-surface">1.666 paket</span>
+</div>
+<div class="flex justify-between py-1 border-b border-surface-container-low">
+<span>Bandung Hub (HUB_BDO)</span>
+<span class="font-mono font-bold text-on-surface">1.667 paket</span>
+</div>
+<div class="flex justify-between py-1">
+<span>Jakarta Hub (HUB_CGK)</span>
+<span class="font-mono font-bold text-on-surface">1.667 paket</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<script>
+    // EXACT 6 HUBS DATA (Strict adherence to data contract)
+    const HUBS_DATA = [
+      {
+        id: "HUB_UPG",
+        name: "Makassar Hub",
+        lat: -5.1477,
+        lng: 119.4327,
+        packages: 1666,
+        meanDwell: 12.99,
+        medianDwell: 12.98,
+        isPriority: true,
+        region: "Sulawesi Selatan"
+      },
+      {
+        id: "HUB_MDN",
+        name: "Medan Hub",
+        lat: 3.5952,
+        lng: 98.6722,
+        packages: 1667,
+        meanDwell: 10.01,
+        medianDwell: 10.02,
+        isPriority: true,
+        region: "Sumatera Utara"
+      },
+      {
+        id: "HUB_SUB",
+        name: "Surabaya Hub",
+        lat: -7.2575,
+        lng: 112.7521,
+        packages: 1667,
+        meanDwell: 6.98,
+        medianDwell: 6.97,
+        isPriority: true,
+        region: "Jawa Timur"
+      },
+      {
+        id: "HUB_SRG",
+        name: "Semarang Hub",
+        lat: -6.9667,
+        lng: 110.4167,
+        packages: 1666,
+        meanDwell: 5.00,
+        medianDwell: 5.01,
+        isPriority: false,
+        region: "Jawa Tengah"
+      },
+      {
+        id: "HUB_BDO",
+        name: "Bandung Hub",
+        lat: -6.9175,
+        lng: 107.6191,
+        packages: 1667,
+        meanDwell: 3.99,
+        medianDwell: 3.98,
+        isPriority: false,
+        region: "Jawa Barat"
+      },
+      {
+        id: "HUB_CGK",
+        name: "Jakarta Hub",
+        lat: -6.2088,
+        lng: 106.8456,
+        packages: 1667,
+        meanDwell: 2.04,
+        medianDwell: 2.05,
+        isPriority: false,
+        region: "DKI Jakarta"
+      }
+    ];
+
+    // Sample Package Queue Data for Interactive Queue Table
+    let QUEUE_ITEMS = [
+      { awb: "100084920194", origin: "Jakarta Hub", hubId: "HUB_UPG", transit: "Makassar Hub", status: "Dalam Sortir", est: "18 Menit", dwell: "12.8 jam", priority: true },
+      { awb: "100084920205", origin: "Surabaya Hub", hubId: "HUB_UPG", transit: "Makassar Hub", status: "Paket Masuk", est: "35 Menit", dwell: "13.1 jam", priority: true },
+      { awb: "100084920311", origin: "Bandung Hub", hubId: "HUB_MDN", transit: "Medan Hub", status: "Dalam Sortir", est: "12 Menit", dwell: "10.2 jam", priority: true },
+      { awb: "100084920422", origin: "Jakarta Hub", hubId: "HUB_MDN", transit: "Medan Hub", status: "Menunggu Muat", est: "45 Menit", dwell: "9.8 jam", priority: true },
+      { awb: "100084920533", origin: "Semarang Hub", hubId: "HUB_SUB", transit: "Surabaya Hub", status: "Dalam Sortir", est: "20 Menit", dwell: "7.1 jam", priority: true },
+      { awb: "100084920644", origin: "Medan Hub", hubId: "HUB_SUB", transit: "Surabaya Hub", status: "Siap Dikirim", est: "Selesai", dwell: "6.8 jam", priority: true },
+      { awb: "100084920755", origin: "Jakarta Hub", hubId: "HUB_SRG", transit: "Semarang Hub", status: "Menunggu Muat", est: "30 Menit", dwell: "4.9 jam", priority: false },
+      { awb: "100084920866", origin: "Surabaya Hub", hubId: "HUB_BDO", transit: "Bandung Hub", status: "Siap Dikirim", est: "Selesai", dwell: "3.8 jam", priority: false },
+      { awb: "100084920977", origin: "Makassar Hub", hubId: "HUB_CGK", transit: "Jakarta Hub", status: "Dalam Sortir", est: "15 Menit", dwell: "2.1 jam", priority: false },
+      { awb: "100084921088", origin: "Semarang Hub", hubId: "HUB_CGK", transit: "Jakarta Hub", status: "Siap Dikirim", est: "Selesai", dwell: "1.9 jam", priority: false }
+    ];
+
+    // State Variables
+    let currentPage = 'hub-dwell-monitor';
+    let leafletMap = null;
+    let leafletMarkers = {};
+    let distributionMap = null;
+    let distributionLayers = { lines: [], markers: [] };
+    let currentFilter = 'all'; // 'all' or 'priority'
+    let currentSearch = '';
+    let selectedHubId = 'HUB_UPG';
+    let simState = 'normal';
+
+    // Sidebar Toggle (Mobile Drawer)
+    function toggleSidebar(open) {
+      const sidebar = document.getElementById('mainSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (open) {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+
+    // Interactive Tab / Page Switching
+    function navigateToPage(pageId) {
+      currentPage = pageId;
+
+      // Update sidebar nav active styling
+      const navIds = ['hub-dwell-monitor', 'antrean-paket', 'sla-clearance-alerts', 'peta-distribusi-hub', 'laporan-analitik'];
+      navIds.forEach(id => {
+        const btn = document.getElementById(`nav-${id}`);
+        if (!btn) return;
+        if (id === pageId) {
+          btn.className = "w-full text-left flex items-center gap-space-sm px-space-md py-2.5 transition-all bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-sm";
+        } else {
+          btn.className = "w-full text-left flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all";
+        }
+      });
+
+      // Hide all page sections, reveal target page
+      document.querySelectorAll('.page-view').forEach(view => {
+        view.classList.add('hidden');
+      });
+      const targetView = document.getElementById(`page-${pageId}`);
+      if (targetView) {
+        targetView.classList.remove('hidden');
+      }
+
+      // Close mobile drawer if open
+      toggleSidebar(false);
+
+      // Invalidate Map sizes when navigating
+      setTimeout(() => {
+        if (pageId === 'hub-dwell-monitor' && leafletMap) {
+          leafletMap.invalidateSize();
+        } else if (pageId === 'peta-distribusi-hub') {
+          if (!distributionMap) {
+            initDistributionFlowMap();
+          } else {
+            distributionMap.invalidateSize();
+          }
+        }
+      }, 100);
+    }
+
+    // Leaflet Pin Icon Generator
+    function createCustomPin(isPriority, isSelected) {
+      const pinBg = isPriority ? '#e6007e' : '#007dbd';
+      const pulseHtml = isPriority ? `<div class="absolute -top-1 -left-1 w-9 h-9 rounded-full bg-primary-container/30 animate-ping"></div>` : '';
+      const scale = isSelected ? 'scale-125' : '';
+
+      return L.divIcon({
+        className: 'custom-anteraja-pin',
+        iconSize: [30, 38],
+        iconAnchor: [15, 38],
+        popupAnchor: [0, -38],
+        html: `
+          <div class="relative w-full h-full flex items-center justify-center cursor-pointer transition-transform ${scale}">
+            ${pulseHtml}
+            <svg width="30" height="38" viewBox="0 0 30 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15 0C6.71573 0 0 6.71573 0 15C0 24 15 38 15 38C15 38 30 24 30 15C30 6.71573 23.2843 0 15 0Z" fill="${pinBg}"/>
+              <circle cx="15" cy="15" r="6" fill="#ffffff"/>
+              <circle cx="15" cy="15" r="3" fill="${pinBg}"/>
+            </svg>
+          </div>
+        `
+      });
+    }
+
+    // Initialize Hub Dwell Monitor Map
+    function initMap() {
+      const mapEl = document.getElementById('anterajaMap');
+      if (!mapEl || leafletMap) return;
+
+      leafletMap = L.map('anterajaMap', {
+        center: [-2.5, 116.0],
+        zoom: 5,
+        zoomControl: true,
+        attributionControl: true
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap contributors | Leaflet'
+      }).addTo(leafletMap);
+
+      renderMapMarkers();
+    }
+
+    // Render Hub Pins on Map (Live update when filtered)
+    function renderMapMarkers() {
+      if (!leafletMap) return;
+
+      Object.values(leafletMarkers).forEach(m => leafletMap.removeLayer(m));
+      leafletMarkers = {};
+
+      const filtered = getFilteredHubs();
+
+      filtered.forEach(hub => {
+        const isSelected = hub.id === selectedHubId;
+        const marker = L.marker([hub.lat, hub.lng], {
+          icon: createCustomPin(hub.isPriority, isSelected),
+          title: hub.name
+        }).addTo(leafletMap);
+
+        const popupContent = `
+          <div class="p-2 font-body-md text-on-surface" style="min-width: 190px;">
+            <div class="flex items-center justify-between border-b pb-1 mb-1 border-surface-container">
+              <strong class="font-headline-sm text-sm text-on-surface font-bold">${hub.name}</strong>
+              <span class="font-label-sm text-[10px] px-1.5 py-0.5 rounded bg-surface-container font-mono font-semibold">${hub.id}</span>
+            </div>
+            <div class="text-[12px] text-on-surface-variant flex flex-col gap-0.5 mt-1 font-body-sm">
+              <div>Paket: <strong class="text-on-surface font-mono">${hub.packages}</strong></div>
+              <div>Mean Dwell: <strong class="${hub.isPriority ? 'text-primary' : 'text-on-surface'} font-mono">${hub.meanDwell.toFixed(2)} jam</strong></div>
+              <div>Median Dwell: <strong class="text-on-surface font-mono">${hub.medianDwell.toFixed(2)} jam</strong></div>
+            </div>
+            <button 
+              onclick="selectHub('${hub.id}', true)" 
+              class="w-full mt-2 py-1 px-2 text-[11px] rounded bg-primary-container text-white font-semibold text-center hover:opacity-90 block"
+            >
+              Buka Detail Investigasi
+            </button>
+          </div>
+        `;
+
+        marker.bindPopup(popupContent);
+        marker.on('click', () => {
+          selectHub(hub.id, false);
+        });
+
+        leafletMarkers[hub.id] = marker;
+      });
+    }
+
+    // Filter Hubs (Interactive)
+    function getFilteredHubs() {
+      if (simState === 'empty') return [];
+
+      return HUBS_DATA.filter(hub => {
+        const matchesFilter = currentFilter === 'all' ? true : hub.isPriority;
+        const searchLower = currentSearch.toLowerCase().trim();
+        const matchesSearch = !searchLower || 
+          hub.name.toLowerCase().includes(searchLower) || 
+          hub.id.toLowerCase().includes(searchLower);
+        return matchesFilter && matchesSearch;
+      });
+    }
+
+    // Render Hub List in Dwell Monitor
+    function renderHubList() {
+      const container = document.getElementById('hubCardsList');
+      const counter = document.getElementById('hubListCounter');
+      const emptyState = document.getElementById('emptyStateContainer');
+      const skeleton = document.getElementById('loadingSkeleton');
+
+      if (!container) return;
+
+      if (simState === 'loading') {
+        container.innerHTML = '';
+        skeleton.classList.remove('hidden');
+        skeleton.classList.add('flex');
+        emptyState.classList.add('hidden');
+        emptyState.classList.remove('flex');
+        counter.textContent = 'Memuat data simulasi...';
+        return;
+      } else {
+        skeleton.classList.add('hidden');
+        skeleton.classList.remove('flex');
+      }
+
+      const hubs = getFilteredHubs();
+      counter.textContent = `Menampilkan ${hubs.length} dari ${HUBS_DATA.length} hub`;
+
+      if (hubs.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+        return;
+      } else {
+        emptyState.classList.add('hidden');
+        emptyState.classList.remove('flex');
+      }
+
+      const maxDwell = 13.5;
+      let html = '';
+
+      hubs.forEach(hub => {
+        const isSelected = hub.id === selectedHubId;
+        const progressPercent = Math.min(100, Math.round((hub.meanDwell / maxDwell) * 100));
+        const activeBorderClass = isSelected ? 'ring-2 ring-primary-container bg-surface-container-low' : 'hover:bg-surface-container-low/60 bg-surface-container-lowest';
+        const accentLeftBorder = hub.isPriority ? 'border-l-4 border-l-primary-container' : 'border-l-4 border-l-tertiary-container';
+
+        html += `
+          <div 
+            onclick="selectHub('${hub.id}', true)" 
+            class="cursor-pointer p-space-md rounded-xl transition-all shadow-xs ${activeBorderClass} ${accentLeftBorder} flex flex-col gap-2"
+          >
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-headline-sm text-headline-sm font-bold text-on-surface">${hub.name}</span>
+                  <span class="font-label-sm text-[11px] font-metric-display text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded font-semibold">${hub.id}</span>
+                </div>
+                <span class="font-body-sm text-body-sm text-outline">${hub.region}</span>
+              </div>
+
+              ${hub.isPriority ? `
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-error-container text-primary flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+                  Prioritas Investigasi
+                </span>
+              ` : `
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant flex items-center gap-1">
+                  Standar Normal
+                </span>
+              `}
+            </div>
+
+            <!-- Metrics with explicit 'jam' units -->
+            <div class="grid grid-cols-3 gap-2 mt-1 pt-1 border-t border-surface-container-high/60">
+              <div>
+                <span class="font-body-sm text-[11px] text-outline block">Paket</span>
+                <span class="font-metric-display text-label-lg font-bold text-on-surface">${hub.packages}</span>
+              </div>
+              <div>
+                <span class="font-body-sm text-[11px] text-outline block">Mean Dwell</span>
+                <span class="font-metric-display text-label-lg font-bold ${hub.isPriority ? 'text-primary' : 'text-on-surface'}">${hub.meanDwell.toFixed(2)} jam</span>
+              </div>
+              <div>
+                <span class="font-body-sm text-[11px] text-outline block">Median Dwell</span>
+                <span class="font-metric-display text-label-lg font-bold text-on-surface">${hub.medianDwell.toFixed(2)} jam</span>
+              </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mt-1 flex flex-col gap-1">
+              <div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+                <div class="h-full ${hub.isPriority ? 'bg-primary-container' : 'bg-tertiary-container'} rounded-full transition-all duration-500" style="width: ${progressPercent}%;"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Select Hub
+    function selectHub(hubId, panMap = true) {
+      selectedHubId = hubId;
+      const hub = HUBS_DATA.find(h => h.id === hubId);
+      if (!hub) return;
+
+      const detailPanel = document.getElementById('detailPanel');
+      if (detailPanel) detailPanel.classList.remove('hidden');
+
+      document.getElementById('detailHubId').textContent = hub.id;
+      document.getElementById('detailHubName').textContent = hub.name;
+      document.getElementById('detailPackages').textContent = hub.packages;
+      document.getElementById('detailMeanDwell').textContent = `${hub.meanDwell.toFixed(2)} jam`;
+      document.getElementById('detailMedianDwell').textContent = `${hub.medianDwell.toFixed(2)} jam`;
+
+      const badgeEl = document.getElementById('detailPriorityBadge');
+      const statusTextEl = document.getElementById('detailStatusText');
+      const meanDwellEl = document.getElementById('detailMeanDwell');
+
+      if (hub.isPriority) {
+        badgeEl.className = "px-2.5 py-1 rounded-full text-xs font-bold bg-error-container text-primary flex items-center gap-1";
+        badgeEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span> Perlu Investigasi Cepat`;
+        statusTextEl.className = "font-label-lg text-label-lg font-bold text-primary mt-1";
+        statusTextEl.textContent = "Prioritas Investigasi (≥ 6.00 jam)";
+        meanDwellEl.className = "font-metric-display text-[22px] text-primary mt-0.5 font-bold";
+      } else {
+        badgeEl.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant flex items-center gap-1";
+        badgeEl.innerHTML = `Sesuai Target Latihan`;
+        statusTextEl.className = "font-label-lg text-label-lg font-bold text-tertiary mt-1";
+        statusTextEl.textContent = "Standar Normal (< 6.00 jam)";
+        meanDwellEl.className = "font-metric-display text-[22px] text-on-surface mt-0.5 font-bold";
+      }
+
+      renderHubList();
+
+      if (leafletMap && leafletMarkers[hubId]) {
+        renderMapMarkers();
+        if (panMap) {
+          leafletMap.flyTo([hub.lat, hub.lng], 7, { animate: true, duration: 1 });
+          setTimeout(() => {
+            if (leafletMarkers[hubId]) leafletMarkers[hubId].openPopup();
+          }, 1000);
+        }
+      }
+    }
+
+    function closeDetailPanel() {
+      document.getElementById('detailPanel').classList.add('hidden');
+    }
+
+    function focusCurrentHubOnMap() {
+      if (selectedHubId) selectHub(selectedHubId, true);
+    }
+
+    function markAsReviewed() {
+      const btn = document.getElementById('btnMarkReviewed');
+      btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">check_circle</span> Selesai Ditinjau`;
+      btn.classList.replace('bg-primary-container', 'bg-tertiary');
+
+      setTimeout(() => {
+        btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">verified</span> Tandai Selesai Tinjau`;
+        btn.classList.replace('bg-tertiary', 'bg-primary-container');
+      }, 2500);
+    }
+
+    function resetMapView() {
+      if (leafletMap) {
+        leafletMap.flyTo([-2.5, 116.0], 5, { animate: true, duration: 1 });
+      }
+    }
+
+    function setFilter(type) {
+      currentFilter = type;
+      const allBtn = document.getElementById('filterAllBtn');
+      const prioBtn = document.getElementById('filterPriorityBtn');
+
+      if (type === 'all') {
+        allBtn.className = "min-h-[44px] flex-1 sm:flex-none px-4 py-2 rounded-lg font-label-lg text-label-lg transition-all bg-surface-container-lowest text-primary font-bold shadow-xs whitespace-nowrap active:scale-95";
+        prioBtn.className = "min-h-[44px] flex-1 sm:flex-none px-4 py-2 rounded-lg font-label-lg text-label-lg transition-all text-on-surface-variant hover:text-on-surface whitespace-nowrap active:scale-95";
+      } else {
+        prioBtn.className = "min-h-[44px] flex-1 sm:flex-none px-4 py-2 rounded-lg font-label-lg text-label-lg transition-all bg-surface-container-lowest text-primary font-bold shadow-xs whitespace-nowrap active:scale-95";
+        allBtn.className = "min-h-[44px] flex-1 sm:flex-none px-4 py-2 rounded-lg font-label-lg text-label-lg transition-all text-on-surface-variant hover:text-on-surface whitespace-nowrap active:scale-95";
+      }
+
+      renderHubList();
+      renderMapMarkers();
+    }
+
+    function handleSearch(query) {
+      currentSearch = query;
+      renderHubList();
+      renderMapMarkers();
+    }
+
+    function resetFilters() {
+      currentSearch = '';
+      const input = document.getElementById('hubSearchInput');
+      if (input) input.value = '';
+      setFilter('all');
+      if (simState !== 'normal') setSimState('normal');
+    }
+
+    function setSimState(state) {
+      simState = state;
+      ['normal', 'loading', 'empty', 'error'].forEach(s => {
+        const btn = document.getElementById('simState' + s.charAt(0).toUpperCase() + s.slice(1));
+        if (!btn) return;
+        if (s === state) {
+          btn.className = "min-h-[36px] px-3 py-1 rounded bg-primary-container text-on-primary font-label-sm text-xs font-semibold transition-all";
+        } else {
+          btn.className = "min-h-[36px] px-3 py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-xs transition-all";
+        }
+      });
+
+      const errBanner = document.getElementById('simErrorBanner');
+      const mainView = document.getElementById('mainDashboardView');
+
+      if (state === 'error') {
+        errBanner.classList.remove('hidden');
+        errBanner.classList.add('flex');
+        mainView.classList.add('opacity-40', 'pointer-events-none');
+      } else {
+        errBanner.classList.add('hidden');
+        errBanner.classList.remove('flex');
+        mainView.classList.remove('opacity-40', 'pointer-events-none');
+      }
+
+      renderHubList();
+      renderMapMarkers();
+    }
+
+    // ==========================================
+    // ANTREAN PAKET (PACKAGE QUEUE TABLE LOGIC)
+    // ==========================================
+    function renderQueueTable() {
+      const tbody = document.getElementById('queueTableBody');
+      if (!tbody) return;
+
+      const search = (document.getElementById('queueSearchInput')?.value || '').toLowerCase();
+      const hubFilter = document.getElementById('queueHubFilter')?.value || 'ALL';
+      const statusFilter = document.getElementById('queueStatusFilter')?.value || 'ALL';
+
+      const filtered = QUEUE_ITEMS.filter(item => {
+        const matchSearch = !search || item.awb.includes(search) || item.origin.toLowerCase().includes(search) || item.transit.toLowerCase().includes(search);
+        const matchHub = hubFilter === 'ALL' || item.hubId === hubFilter;
+        const matchStatus = statusFilter === 'ALL' || item.status === statusFilter;
+        return matchSearch && matchHub && matchStatus;
+      });
+
+      document.getElementById('queueTableCounter').textContent = `Menampilkan ${filtered.length} Antrean Paket`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-on-surface-variant">Tidak ada antrean paket yang sesuai filter.</td></tr>`;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach((item) => {
+        const statusBadge = item.status === 'Dalam Sortir' ? 'bg-secondary-fixed text-secondary' :
+                            item.status === 'Paket Masuk' ? 'bg-surface-container-high text-on-surface' :
+                            item.status === 'Menunggu Muat' ? 'bg-error-container text-primary font-bold' :
+                            'bg-tertiary-fixed text-tertiary';
+
+        html += `
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="py-3 px-4 font-mono font-bold text-on-surface">${item.awb}</td>
+            <td class="py-3 px-4 text-on-surface-variant">${item.origin}</td>
+            <td class="py-3 px-4 font-semibold text-on-surface">${item.transit}</td>
+            <td class="py-3 px-4">
+              <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${statusBadge}">${item.status}</span>
+            </td>
+            <td class="py-3 px-4 text-on-surface-variant font-mono text-xs">${item.est}</td>
+            <td class="py-3 px-4 font-mono font-bold ${item.priority ? 'text-primary' : 'text-on-surface'}">${item.dwell}</td>
+            <td class="py-3 px-4 text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                <button onclick="prioritizeQueueItem('${item.awb}')" class="min-h-[36px] px-3 py-1 rounded bg-primary-container text-white text-[11px] font-semibold hover:opacity-90">
+                  Prioritaskan
+                </button>
+                <button onclick="rerouteQueueItem('${item.awb}')" class="min-h-[36px] px-3 py-1 rounded bg-surface-container text-on-surface text-[11px] font-semibold hover:bg-surface-container-high">
+                  Reroute
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function filterQueueTable() {
+      renderQueueTable();
+    }
+
+    function refreshQueueData() {
+      renderQueueTable();
+    }
+
+    function prioritizeQueueItem(awb) {
+      alert(`Paket AWB ${awb} berhasil dinaikkan ke antrean prioritas sortir darurat.`);
+    }
+
+    function rerouteQueueItem(awb) {
+      alert(`Permintaan reroute jalur untuk paket AWB ${awb} telah dikirim ke dispatch controller.`);
+    }
+
+    // ==========================================
+    // SLA CLEARANCE ALERTS ACTIVITY FEED
+    // ==========================================
+    const ALERT_LOGS = [
+      { id: 1, hub: "Makassar Hub", time: "2 Menit lalu", msg: "Dwell time melebihi batas 12.0 jam pada cluster sortir incoming. Potensi bottleneck tinggi.", type: "critical" },
+      { id: 2, hub: "Medan Hub", time: "14 Menit lalu", msg: "Mean dwell tercatat 10.01 jam. Keterlambatan loading truk linehaul Sumatera.", type: "warning" },
+      { id: 3, hub: "Surabaya Hub", time: "28 Menit lalu", msg: "Mean dwell melampaui target latihan (6.98 jam vs 6.00 jam). Rekomendasi pembukaan dock darurat.", type: "warning" },
+      { id: 4, hub: "Semarang Hub", time: "1 Jam lalu", msg: "Throughput normal (5.00 jam). SLA clearance terjaga 95%.", type: "info" },
+      { id: 5, hub: "Jakarta Hub", time: "2 Jam lalu", msg: "Clearance cepat tercapai (2.04 jam). 1.667 paket tersortir sesuai jadwal.", type: "info" }
+    ];
+
+    function renderAlertFeed() {
+      const container = document.getElementById('alertFeedList');
+      if (!container) return;
+
+      let html = '';
+      ALERT_LOGS.forEach(log => {
+        const dotColor = log.type === 'critical' ? 'bg-primary-container' :
+                         log.type === 'warning' ? 'bg-secondary-container' : 'bg-tertiary-container';
+        
+        html += `
+          <div class="py-3 flex items-start justify-between gap-3">
+            <div class="flex items-start gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full ${dotColor} mt-1.5 flex-shrink-0"></span>
+              <div class="flex flex-col">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-on-surface text-sm">${log.hub}</span>
+                  <span class="text-[11px] text-outline font-mono">${log.time}</span>
+                </div>
+                <p class="font-body-sm text-xs text-on-surface-variant mt-0.5">${log.msg}</p>
+              </div>
+            </div>
+            <button onclick="alert('Log ID: ${log.id} ditandai dalam investigasi.')" class="min-h-[36px] px-2.5 py-1 text-xs rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold flex-shrink-0">
+              Tinjau
+            </button>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function triggerAlertAction(hubId, actionName) {
+      alert(`Aksi [${actionName}] untuk ${hubId} telah dieksekusi ke tim lapangan.`);
+    }
+
+    function bulkAcknowledgeAlerts() {
+      alert("Semua peringatan alert dwell telah ditandai ditinjau oleh Supervisor Budi Santoso.");
+    }
+
+    // ==========================================
+    // PETA DISTRIBUSI HUB (DISTRIBUTION FLOW MAP)
+    // ==========================================
+    function initDistributionFlowMap() {
+      const container = document.getElementById('distributionFlowMap');
+      if (!container || distributionMap) return;
+
+      distributionMap = L.map('distributionFlowMap', {
+        center: [-2.5, 117.0],
+        zoom: 5,
+        zoomControl: true,
+        attributionControl: true
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap contributors | Leaflet'
+      }).addTo(distributionMap);
+
+      // Connection lines between hubs
+      const routes = [
+        { from: "HUB_CGK", to: "HUB_BDO", critical: false },
+        { from: "HUB_BDO", to: "HUB_SRG", critical: false },
+        { from: "HUB_SRG", to: "HUB_SUB", critical: true },
+        { from: "HUB_SUB", to: "HUB_UPG", critical: true },
+        { from: "HUB_CGK", to: "HUB_MDN", critical: true }
+      ];
+
+      distributionLayers.lines = [];
+      distributionLayers.markers = [];
+
+      routes.forEach(r => {
+        const h1 = HUBS_DATA.find(h => h.id === r.from);
+        const h2 = HUBS_DATA.find(h => h.id === r.to);
+        if (h1 && h2) {
+          const polyline = L.polyline([[h1.lat, h1.lng], [h2.lat, h2.lng]], {
+            color: r.critical ? '#e6007e' : '#007dbd',
+            weight: r.critical ? 3.5 : 2.5,
+            opacity: 0.8,
+            dashArray: r.critical ? '6, 8' : null
+          }).addTo(distributionMap);
+          distributionLayers.lines.push(polyline);
+        }
+      });
+
+      // Markers for flow map
+      HUBS_DATA.forEach(hub => {
+        const marker = L.circleMarker([hub.lat, hub.lng], {
+          radius: hub.isPriority ? 9 : 7,
+          fillColor: hub.isPriority ? '#e6007e' : '#007dbd',
+          color: '#ffffff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.9
+        }).addTo(distributionMap);
+
+        marker.bindPopup(`
+          <div class="p-1 font-body-sm">
+            <strong class="font-bold text-on-surface">${hub.name}</strong><br/>
+            Mean Dwell: <span class="font-mono font-bold ${hub.isPriority ? 'text-primary' : 'text-on-surface'}">${hub.meanDwell.toFixed(2)} jam</span><br/>
+            Paket Simulasi: <span class="font-mono font-bold">${hub.packages}</span>
+          </div>
+        `);
+
+        distributionLayers.markers.push(marker);
+      });
+    }
+
+    function toggleFlowMapLines() {
+      const checked = document.getElementById('toggleLines').checked;
+      if (!distributionMap) return;
+      distributionLayers.lines.forEach(l => {
+        if (checked) distributionMap.addLayer(l);
+        else distributionMap.removeLayer(l);
+      });
+    }
+
+    function toggleFlowMapMarkers() {
+      const checked = document.getElementById('toggleMarkers').checked;
+      if (!distributionMap) return;
+      distributionLayers.markers.forEach(m => {
+        if (checked) distributionMap.addLayer(m);
+        else distributionMap.removeLayer(m);
+      });
+    }
+
+    // ==========================================
+    // EXPORT HANDLERS (ANALYTICS)
+    // ==========================================
+    function handleExport(format) {
+      if (format === 'csv') {
+        const csvRows = [
+          "ID_Hub,Nama_Hub,Region,Jumlah_Paket,Mean_Dwell_Jam,Median_Dwell_Jam,Status_Prioritas",
+          ...HUBS_DATA.map(h => `${h.id},"${h.name}","${h.region}",${h.packages},${h.meanDwell},${h.medianDwell},${h.isPriority ? 'Prioritas' : 'Normal'}`)
+        ];
+        const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Anteraja_Hub_Dwell_Simulation_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else if (format === 'pdf') {
+        window.print();
+      } else if (format === 'email') {
+        alert("Ringkasan mingguan laporan performa dwell 6 hub simulasi telah dikirimkan ke supervisor operasional.");
+      }
+    }
+
+    // Resize listener for Leaflet maps responsiveness
+    window.addEventListener('resize', () => {
+      if (leafletMap) leafletMap.invalidateSize();
+      if (distributionMap) distributionMap.invalidateSize();
+    });
+
+    // Initialization
+    function initializeApp() {
+      initMap();
+      renderHubList();
+      selectHub('HUB_UPG', false);
+      renderQueueTable();
+      renderAlertFeed();
+    }
+
+    window.addEventListener('DOMContentLoaded', initializeApp);
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(initializeApp, 100);
+    }
+  </script>
+</body></html>
